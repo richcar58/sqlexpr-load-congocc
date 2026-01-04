@@ -4,7 +4,7 @@
 
 ### Overview
 
-This is the initial release of sqlexpr-load-congocc, a load testing and performance evaluation program for the [sqlexpr-congocc](https://github.com/richcar58/sqlexpr-congocc) SQL expression evaluator library.  The code repository is [sqlexpr-load-congocc](https://github.com/richcar58/sqlexpr-load-congocc).
+This is the initial release of sqlexpr-load-congocc, a load testing and performance evaluation program for the [sqlexpr-congocc](https://github.com/richcar58/sqlexpr-congocc) SQL expression evaluator library.  This project's code repository is [sqlexpr-load-congocc](https://github.com/richcar58/sqlexpr-load-congocc).
 
 ### Key Features
 
