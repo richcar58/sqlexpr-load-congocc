@@ -1,5 +1,8 @@
 # Compiled class files
 /target/
-/output/
 *.class
 *.jar
+.classpath
+.settings
+.project
+.theia

@@ -13,13 +13,15 @@ import java.util.stream.Collectors;
  */
 public class LoadTester {
     private final int iterations;
+    private final String inputFilePath;
     private final Map<Integer, ClassTimings> classTimingsMap;
     private final List<FailedEvaluation> failedEvaluations;
     private final Map<String, Integer> complexityCache;
     private final Set<String> failedExpressions;
 
-    public LoadTester(int iterations) {
+    public LoadTester(int iterations, String inputFilePath) {
         this.iterations = iterations;
+        this.inputFilePath = inputFilePath;
         this.classTimingsMap = new TreeMap<>();
         this.failedEvaluations = new ArrayList<>();
         this.complexityCache = new HashMap<>();
@@ -84,6 +86,7 @@ public class LoadTester {
             .sum();
 
         OverallStatistics overall = new OverallStatistics(
+            inputFilePath,
             startLocal,
             startUtc,
             iterations,

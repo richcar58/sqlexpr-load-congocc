@@ -23,7 +23,7 @@ This is a load testing and performance evaluation program for the sqlexpr-congoc
 
 This project uses Maven 3.9.9+ for build management and requires Java 21+ for compilation (targets Java 17+ runtime).
 
-**Compile (including CongoCC parser generation):**
+**Compile:**
 ```bash
 mvn compile
 ```
@@ -93,20 +93,25 @@ src/main/java/net/magneticpotato/
 
 ### Data Flow
 
-1. Load expressions from `src/main/resources/complex_expressions.json`
-2. Calculate complexity class for each expression
-3. For each iteration:
+1. Parse command line arguments (`--input`, `--iterations`)
+2. Load expressions from specified file or default classpath resource
+   - Resolve absolute path for reporting
+3. Calculate complexity class for each expression
+4. For each iteration:
    - Time evaluation of each expression using `SqlExprEvaluator.match()`
    - Track timing in appropriate complexity class bucket
    - Skip expressions that previously failed
-4. Compute statistics per complexity class
-5. Generate formatted markdown reports
+5. Compute statistics per complexity class
+6. Generate formatted markdown reports with input file path
 
 ## Dependencies
 
 **sqlexpr-congocc (1.0.0)**: The SQL expression parser/evaluator library being tested
 - Group ID: `net.magneticpotato`
 - Main API: `SqlExprEvaluator.match(String sqlText, Map<String, Object> properties)`
+- Repository: https://github.com/richcar58/sqlexpr-congocc
+- Purpose: Parses and evaluates SQL-like boolean expressions without requiring a database
+- Built with CongoCC parser generator
 
 **Jackson Databind (2.18.0)**: JSON parsing with streaming support
 - Used for efficiently loading large JSON files
@@ -114,7 +119,7 @@ src/main/java/net/magneticpotato/
 
 ## Usage
 
-**Run with default 1 iteration:**
+**Run with default 1 iteration and default input file:**
 ```bash
 mvn exec:java
 ```
@@ -124,20 +129,37 @@ mvn exec:java
 mvn exec:java -Dexec.args="--iterations 100"
 ```
 
-**Build executable JAR:**
+**Run with custom input file:**
 ```bash
-mvn package
-java -jar target/sqlexpr-load-congocc-1.0.0.jar --iterations 100
+mvn exec:java -Dexec.args="--input complex_expressions.json"
 ```
 
+**Run with both custom input and iterations:**
+```bash
+mvn exec:java -Dexec.args="--input /path/to/expressions.json --iterations 100"
+```
+
+**Build executable JAR and run:**
+```bash
+mvn package
+java -jar target/sqlexpr-load-congocc-1.0.0.jar --input custom.json --iterations 100
+```
+
+**Command Line Arguments:**
+- `--input FILE`: Path to JSON expressions file (absolute or relative to `src/main/resources/`)
+  - Default: `complex_expressions-limited.json` from classpath
+  - Supports absolute paths: `/home/user/data/expressions.json`
+  - Supports relative paths: `file.json` (resolved to `src/main/resources/file.json`)
+- `--iterations N`: Number of test iterations (default: 1, must be >= 1)
+
 **Output Files:**
-- `output/test_timings.md`: Performance statistics by complexity class
+- `output/test_timings.md`: Performance statistics by complexity class (includes input file path)
 - `output/failed_tests.md`: Failed evaluation details (created only if failures occur)
 
 ## Development Notes
 
 - Java 21+ required for compilation (configured in pom.xml)
-- Target runtime: Java 17+
+- Target runtime: Java 21+
 - Maven 3.9.9+ required
 - Build artifacts are excluded via .gitignore (target/ directory, .class and .jar files)
 - Uses Java records for immutable data models

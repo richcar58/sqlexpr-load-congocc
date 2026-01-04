@@ -93,3 +93,19 @@ Create a README.md file that:
 Update CLAUDE.MD with the latest design and features descriptions.
 
 Create a RELEASE_NOTES.md file that provides basic information on release 1.0.0.
+
+# User Specified Input File Support
+
+The release 1.0.0 code always reads it input from the *releases/complex_expressions.json* file.  This enhancement allows users to specifiy which input file should be processed on a given run.  Here is what the new support for input file choice entails:
+
+1. A new, optional, command line argument, *--input*, will specify which expression file will be processed.
+2. If *--input* is not specified, the default value  *complex_expressions-limited.json* is used.
+    1. If the *--input* value is an absolute path, then that path will be used as is
+    2. If the *--input* value is a relative path, it is relative to the *resources* directory.  This implies that the default input file is found at *resources/complex_expressions-limited.json*.
+3. The *output/test_timings.md* result file will now include the absolute path of the input file in its *Overall Statistics* section.
+4. The changes will be validated by running the load test without specifying a *--input* argument.
+5. The README.md and CLAUDE.md files will be updated to reflect this new enhancement.
+
+Please generate a plan implement the above code, validation and documentation requirements.  Don't make any changes until the plan is reviewed and approved.
+
+Please generate a RELEASE_NOTES.md file that describes the main features of the 1.0.0 release.

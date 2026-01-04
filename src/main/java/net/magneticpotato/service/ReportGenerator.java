@@ -117,6 +117,9 @@ public class ReportGenerator {
     private static String formatOverallStats(OverallStatistics stats) {
         StringBuilder sb = new StringBuilder();
 
+        sb.append("- **Input File**: ")
+            .append(stats.inputFilePath())
+            .append("\n");
         sb.append("- **Start Time (Local)**: ")
             .append(stats.startTimeLocal().format(TIMESTAMP_FORMATTER))
             .append("\n");

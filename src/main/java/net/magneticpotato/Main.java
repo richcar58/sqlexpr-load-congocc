@@ -15,23 +15,37 @@ import java.util.List;
  */
 public class Main {
 
-    private static final String JSON_RESOURCE = "/complex_expressions.json";
+    private static final String DEFAULT_INPUT_FILE = "complex_expressions-limited.json";
     private static final String OUTPUT_DIR = "output";
     private static final String TIMINGS_FILE = "test_timings.md";
     private static final String FAILED_FILE = "failed_tests.md";
 
+    /**
+     * CLI configuration record.
+     */
+    private record CliConfig(String inputFile, int iterations, boolean isClasspathResource) {}
+
     public static void main(String[] args) {
         try {
             // Parse CLI arguments
-            int iterations = parseIterations(args);
+            CliConfig config = parseCliArguments(args);
 
-            System.out.println("Loading expressions from JSON...");
-            List<ExpressionData> expressions = ExpressionLoader.loadExpressions(JSON_RESOURCE);
+            System.out.println("Loading expressions from: " + config.inputFile);
+
+            // Load expressions based on source type
+            ExpressionLoader.LoadedExpressions loaded = config.isClasspathResource
+                ? ExpressionLoader.loadExpressionsFromClasspath(config.inputFile)
+                : ExpressionLoader.loadExpressionsFromFile(config.inputFile);
+
+            List<ExpressionData> expressions = loaded.expressions();
+            String absolutePath = loaded.absolutePath();
+
             System.out.println("Loaded " + expressions.size() + " expressions");
+            System.out.println("Resolved path: " + absolutePath);
 
-            System.out.println("Running load test with " + iterations + " iteration(s)...");
+            System.out.println("Running load test with " + config.iterations + " iteration(s)...");
 
-            LoadTester tester = new LoadTester(iterations);
+            LoadTester tester = new LoadTester(config.iterations, absolutePath);
             LoadTestResult result = tester.run(expressions);
 
             System.out.println("Generating reports...");
@@ -68,32 +82,72 @@ public class Main {
     }
 
     /**
-     * Parses command line arguments to get the iterations value.
+     * Parses command line arguments to get configuration.
      *
      * @param args command line arguments
-     * @return the number of iterations
+     * @return CLI configuration
      * @throws IllegalArgumentException if arguments are invalid
      */
-    private static int parseIterations(String[] args) {
-        if (args.length == 0) {
-            return 1;  // Default
-        }
+    private static CliConfig parseCliArguments(String[] args) {
+        String inputFile = DEFAULT_INPUT_FILE;
+        int iterations = 1;
+        boolean isClasspathResource = true;
 
-        if (args.length == 2 && "--iterations".equals(args[0])) {
-            try {
-                int iterations = Integer.parseInt(args[1]);
-                if (iterations < 1) {
-                    throw new IllegalArgumentException("Iterations must be >= 1");
-                }
-                return iterations;
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Invalid iterations value: " + args[1]);
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "--input":
+                    if (i + 1 >= args.length) {
+                        throw new IllegalArgumentException("--input requires a file path");
+                    }
+                    inputFile = args[++i];
+                    isClasspathResource = false;
+                    break;
+                case "--iterations":
+                    if (i + 1 >= args.length) {
+                        throw new IllegalArgumentException("--iterations requires a value");
+                    }
+                    iterations = parseInt(args[++i]);
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                        "Unknown argument: " + args[i] + "\n" + getUsageMessage()
+                    );
             }
         }
 
-        throw new IllegalArgumentException(
-            "Usage: java Main [--iterations N]\n" +
-            "  --iterations N  Number of iterations (default: 1, must be >= 1)"
-        );
+        return new CliConfig(inputFile, iterations, isClasspathResource);
+    }
+
+    /**
+     * Parses an integer value with validation.
+     *
+     * @param value the string value to parse
+     * @return the parsed integer
+     * @throws IllegalArgumentException if value is invalid
+     */
+    private static int parseInt(String value) {
+        try {
+            int result = Integer.parseInt(value);
+            if (result < 1) {
+                throw new IllegalArgumentException("Iterations must be >= 1");
+            }
+            return result;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid iterations value: " + value);
+        }
+    }
+
+    /**
+     * Returns the usage message.
+     *
+     * @return usage message string
+     */
+    private static String getUsageMessage() {
+        return "Usage: java Main [--input FILE] [--iterations N]\n" +
+               "  --input FILE       Path to expressions JSON file\n" +
+               "                     - Absolute path: /home/user/data/file.json\n" +
+               "                     - Relative path: file.json (resolved to src/main/resources/file.json)\n" +
+               "                     - Default: complex_expressions-limited.json (from classpath)\n" +
+               "  --iterations N     Number of iterations (default: 1, must be >= 1)";
     }
 }
