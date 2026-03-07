@@ -134,20 +134,23 @@ mvn exec:java -Dexec.args="--input file.json --iterations 10"
 ## Project Structure
 
 ```
-src/main/java/net/magneticpotato/
-├── Main.java                   # Entry point, CLI parsing
-├── model/                      # Data models (records)
-│   ├── ClassStatistics.java
-│   ├── ClassTimings.java
-│   ├── ExpressionData.java
-│   ├── FailedEvaluation.java
-│   ├── LoadTestResult.java
-│   └── OverallStatistics.java
-└── service/                    # Business logic
-    ├── ComplexityCalculator.java
-    ├── ExpressionLoader.java
-    ├── LoadTester.java
-    └── ReportGenerator.java
+src/main/
+├── java/net/magneticpotato/
+│   ├── Main.java                   # Entry point, CLI parsing
+│   ├── model/                      # Data models (records)
+│   │   ├── ClassStatistics.java
+│   │   ├── ClassTimings.java
+│   │   ├── ExpressionData.java
+│   │   ├── FailedEvaluation.java
+│   │   ├── LoadTestResult.java
+│   │   └── OverallStatistics.java
+│   └── service/                    # Business logic
+│       ├── ComplexityCalculator.java
+│       ├── ExpressionLoader.java
+│       ├── LoadTester.java
+│       └── ReportGenerator.java
+└── resources/
+    └── complex_expressions-limited.json  # Default test expressions
 ```
 
 ## License
